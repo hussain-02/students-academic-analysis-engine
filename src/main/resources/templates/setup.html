@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Setup - SAAE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .setup-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .info-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .info-box h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .info-box p {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .warning-box strong {
+            color: #856404;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .credentials {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .credentials h3 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .credential-item {
+            background: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="setup-container">
+        <h1>🔧 Database Setup</h1>
+        <p class="subtitle">Fix Password Authentication</p>
+
+        <div class="info-box">
+            <h3>What does this do?</h3>
+            <p>This will update all user passwords in your database to use secure BCrypt hashing. This is required
+                because the application now uses industry-standard password encryption.</p>
+        </div>
+
+        <div class="warning-box">
+            <strong>⚠️ Important:</strong> Click the button below to update passwords. This only needs to be done once.
+        </div>
+
+        <button onclick="updatePasswords()" id="updateBtn">
+            🔐 Update All Passwords
+        </button>
+
+        <div id="result" class="result"></div>
+
+        <div class="credentials">
+            <h3>📋 Default Login Credentials</h3>
+            <div class="credential-item">
+                <strong>Admin:</strong> admin / admin123
+            </div>
+            <div class="credential-item">
+                <strong>Faculty:</strong> faculty / faculty123
+            </div>
+            <div class="credential-item">
+                <strong>Student:</strong> student / student123
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function updatePasswords() {
+            const btn = document.getElementById('updateBtn');
+            const result = document.getElementById('result');
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Updating...';
+            result.style.display = 'none';
+
+            try {
+                const response = await fetch('/setup/hash-passwords', {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                result.style.display = 'block';
+
+                if (data.success) {
+                    result.className = 'result success';
+                    result.innerHTML = `
+                        <strong>✅ Success!</strong><br>
+                        ${data.message}<br><br>
+                        <a href="/" style="color: #155724; text-decoration: underline;">Go to Login Page</a>
+                    `;
+                    btn.textContent = '✅ Passwords Updated!';
+                } else {
+                    result.className = 'result error';
+                    result.innerHTML = `
+                        <strong>❌ Error</strong><br>
+                        ${data.message}
+                    `;
+                    btn.disabled = false;
+                    btn.textContent = '🔐 Update All Passwords';
+                }
+            } catch (error) {
+                result.style.display = 'block';
+                result.className = 'result error';
+                result.innerHTML = `
+                    <strong>❌ Error</strong><br>
+                    Connection failed: ${error.message}
+                `;
+                btn.disabled = false;
+                btn.textContent = '🔐 Update All Passwords';
+            }
+        }
+    </script>
+</body>
+
+</html>
