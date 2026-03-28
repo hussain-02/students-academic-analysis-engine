@@ -1,6 +1,6 @@
 const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? '/api'
-    : 'https://daed-backend.onrender.com/api'; // Replace with your current Render URL if it changed
+    : 'https://saae-backend.onrender.com/api'; // Pointing to the new Render backend
 
 // State
 let currentUser = JSON.parse(localStorage.getItem('user'));
